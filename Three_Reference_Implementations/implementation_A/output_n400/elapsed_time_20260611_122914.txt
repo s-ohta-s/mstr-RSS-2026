@@ -1,0 +1,7 @@
+Program elapsed-time report
+----------------------------------------
+Start time      : 2026-06-11 12:29:14
+End time        : 2026-06-11 12:48:39
+Elapsed (wall)  : 00:19:25.40 (1165.40 sec = 19.42 min)
+CPU user time   : 64.79 sec
+CPU system time : 19.55 sec

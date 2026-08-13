@@ -1,0 +1,6 @@
+timestamp: 2026-07-23 07:43:23
+reps=300 workers=8 serial=FALSE A=TRUE B=TRUE
+dgps=1111,0111,1011 paramsets=weak,mid,strong,realistic ns=900
+base_seed=20260711
+elapsed_min=4587.55
+failed=0/3600

@@ -1,0 +1,2 @@
+"n","zero_row_count","min_row_sum_before","max_row_sum_before","max_abs_deviation_before","row_standardized","min_row_sum_after","max_row_sum_after","max_abs_deviation_after","tolerance"
+400,0,0.999999999999999,1,1.11022302462516e-15,FALSE,0.999999999999999,1,1.11022302462516e-15,1e-08
