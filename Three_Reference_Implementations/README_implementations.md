@@ -54,37 +54,37 @@ As implemented, the three programs work with elementwise bounds $\lvert\rho_{k\e
 
 - B rejects candidates only where a $2\times2$ factor determinant is exactly singular (log-determinant $-\infty$); it accumulates $\log\lvert\det(\boldsymbol{I}_2 - \omega_i\boldsymbol{R})\rvert$ through LU factorization, i.e. the absolute value, so sign changes of individual factors are not themselves rejected. B's admissible region is therefore slightly larger than C's, and coincides with it on the connected component around $\boldsymbol{R} = \boldsymbol{0}$ in which all real factors stay positive.
 
-Because $\boldsymbol{W}$ in this directory is a row-standardized adjacency matrix derived from a symmetric neighborhood structure, its spectrum is real with $\omega_i \in (-1,1]$ ($\max_i\omega_i = 1$ for row-standardized $\boldsymbol{W}$), and all estimates reported below lie in the interior region where the three admissibility rules agree. For general asymmetric $\boldsymbol{W}$ with complex eigenvalues, the differences above (B: real parts of $\operatorname{eig}(\boldsymbol{W})$ are used; C: complex factors via modulus with a positivity check on real factors; A: real part of the polynomial value) should be reviewed before use. No post-hoc rescaling of $\boldsymbol{R}$ or $\boldsymbol{\Lambda}$ by spectral radius is performed by any implementation.
+Because $\boldsymbol{W}$ in this directory is a row-standardized adjacency matrix derived from a symmetric neighborhood structure, its spectrum is real with $\omega_i \in (-1,1]$ ($\max_i\omega_i = 1$ for row-standardized $\boldsymbol{W}$), and all estimates reported below lie in the interior region where the three admissibility rules agree. For general asymmetric $\boldsymbol{W}$ with complex eigenvalues, the differences above (B: real parts of $\mathrm{eig}(\boldsymbol{W})$ are used; C: complex factors via modulus with a positivity check on real factors; A: real part of the polynomial value) should be reviewed before use. No post-hoc rescaling of $\boldsymbol{R}$ or $\boldsymbol{\Lambda}$ by spectral radius is performed by any implementation.
 
 ### 2.4 Precise definition of the effective degrees of freedom
 
 To make Eq. (20) operational, all three implementations use:
 
-- $\boldsymbol{H}$ (denoted $\boldsymbol{I}_{11}$): the numerically evaluated Hessian (finite differences; `numDeriv::hessian` with Richardson extrapolation, or `optimHess` fallback in B) of the negative profile log-likelihood $-\ell_c(\boldsymbol{\theta}_1)$ (step S3 of §4.2) — $\hat{\boldsymbol{\beta}}$ and $\hat{\boldsymbol{\Sigma}}$ are re-profiled by inner GLS at every evaluation point — taken at $\hat{\boldsymbol{\theta}}_1$ in the original $(\boldsymbol{\rho}, \boldsymbol{\lambda})$ parameterization, not in the tanh-transformed space used by B's optimizer. Since effective degrees of freedom are not invariant to nonlinear reparameterization, this choice matters and is stated here explicitly: the reported $\operatorname{deff}$ corresponds to Eq. (20) in the original spatial-parameter space, consistent with Appendix C of the paper. We avoid the term "exact Hessian"; in B's candidate mode, "exact" refers only to evaluating the numerical Hessian rather than bounding it.
+- $\boldsymbol{H}$ (denoted $\boldsymbol{I}_{11}$): the numerically evaluated Hessian (finite differences; `numDeriv::hessian` with Richardson extrapolation, or `optimHess` fallback in B) of the negative profile log-likelihood $-\ell_c(\boldsymbol{\theta}_1)$ (step S3 of §4.2) — $\hat{\boldsymbol{\beta}}$ and $\hat{\boldsymbol{\Sigma}}$ are re-profiled by inner GLS at every evaluation point — taken at $\hat{\boldsymbol{\theta}}_1$ in the original $(\boldsymbol{\rho}, \boldsymbol{\lambda})$ parameterization, not in the tanh-transformed space used by B's optimizer. Since effective degrees of freedom are not invariant to nonlinear reparameterization, this choice matters and is stated here explicitly: the reported $\mathrm{deff}$ corresponds to Eq. (20) in the original spatial-parameter space, consistent with Appendix C of the paper. We avoid the term "exact Hessian"; in B's candidate mode, "exact" refers only to evaluating the numerical Hessian rather than bounding it.
 
 - $\boldsymbol{I}$: the identity on the penalized spatial block $\boldsymbol{\theta}_1$ only (dimension = number of free entries of $\boldsymbol{R}$ and $\boldsymbol{\Lambda}$). Regression coefficients $\boldsymbol{\beta}$ (including the temporal AR terms folded into $\boldsymbol{\beta}$ by Eq. (7)) and the free elements of $\boldsymbol{\Sigma}$ are not penalized and contribute their full count:
 
   $$
-  \operatorname{deff}
-  = \operatorname{tr}\!\left[\boldsymbol{H}(\boldsymbol{H}+\gamma\boldsymbol{I})^{-1}\right]
+  \mathrm{deff}
+  = \mathrm{tr}\!\left[\boldsymbol{H}(\boldsymbol{H}+\gamma\boldsymbol{I})^{-1}\right]
   + p + \#\boldsymbol{\Sigma},
   $$
 
-  where $p = \operatorname{ncol}(\text{X-block})$ and $\#\boldsymbol{\Sigma} = K(K+1)/2$ (full $\boldsymbol{\Sigma}$) or $K$ (diagonal $\boldsymbol{\Sigma}$). At $\gamma = 0$, the trace term is set to $\dim(\boldsymbol{\theta}_1)$ exactly.
+  where $p = \mathrm{ncol}(\text{X-block})$ and $\#\boldsymbol{\Sigma} = K(K+1)/2$ (full $\boldsymbol{\Sigma}$) or $K$ (diagonal $\boldsymbol{\Sigma}$). At $\gamma = 0$, the trace term is set to $\dim(\boldsymbol{\theta}_1)$ exactly.
 
 - Sample size in pBIC:
 
   $$
-  \operatorname{pAIC} = -2\ell + 2\operatorname{deff},
+  \mathrm{pAIC} = -2\ell + 2\mathrm{deff},
   \qquad
-  \operatorname{pBIC} = -2\ell + \log(KnT_{\mathrm{used}})\operatorname{deff},
+  \mathrm{pBIC} = -2\ell + \log(KnT_{\mathrm{used}})\mathrm{deff},
   $$
 
   with $K = 2$, $n = 400$, and $T_{\mathrm{used}} = 1$, i.e. $\log(800)$ in both B and C for this dataset. (B: `log(n_eff_total)` with `n_eff_total = 2 * n * TT`; C: `log(dl$K * dl$n)`.)
 
 - $\gamma$-penalty scope: the shrinkage applies only to the six models with a full $\boldsymbol{R}$ or $\boldsymbol{\Lambda}$ block; the five remaining models are evaluated at $\gamma = 0$, so their reported pAIC/pBIC equal ordinary AIC/BIC.
 
-- Negative Hessian eigenvalues: B symmetrizes $\boldsymbol{H}$ and floors negative eigenvalues at zero, issuing a warning whenever an eigenvalue is below $-10^{-6}$; C computes $\operatorname{tr}[\boldsymbol{H}(\boldsymbol{H}+\gamma\boldsymbol{I})^{-1}]$ directly and falls back to the nominal count if the Hessian evaluation fails. Flooring (and the fallback) are numerical approximations, not verified properties: eigenvalues that are materially negative can indicate non-convergence to a local minimum, unstable finite differences, weak identification, or local non-convexity of the profile objective. In the runs reported below, no flooring warning was triggered beyond round-off level, but users should treat any such warning as a diagnostic. Planned diagnostic outputs per fit (see Section 7): minimum eigenvalue, number of negative eigenvalues, largest absolute negative eigenvalue, condition number of $\boldsymbol{H}$, $\operatorname{deff}$ before/after flooring, and a step-size sensitivity check of the finite-difference Hessian.
+- Negative Hessian eigenvalues: B symmetrizes $\boldsymbol{H}$ and floors negative eigenvalues at zero, issuing a warning whenever an eigenvalue is below $-10^{-6}$; C computes $\mathrm{tr}[\boldsymbol{H}(\boldsymbol{H}+\gamma\boldsymbol{I})^{-1}]$ directly and falls back to the nominal count if the Hessian evaluation fails. Flooring (and the fallback) are numerical approximations, not verified properties: eigenvalues that are materially negative can indicate non-convergence to a local minimum, unstable finite differences, weak identification, or local non-convexity of the profile objective. In the runs reported below, no flooring warning was triggered beyond round-off level, but users should treat any such warning as a diagnostic. Planned diagnostic outputs per fit (see Section 7): minimum eigenvalue, number of negative eigenvalues, largest absolute negative eigenvalue, condition number of $\boldsymbol{H}$, $\mathrm{deff}$ before/after flooring, and a step-size sensitivity check of the finite-difference Hessian.
 
 ## 3. Quantitative verification
 
@@ -99,7 +99,7 @@ For $K = 2$, the log-determinant schemes of the three implementations are algebr
 $$
 \det(\boldsymbol{I}_2 - \omega\boldsymbol{M})
 = (1 - \omega a_1)(1 - \omega a_2)
-= 1 - \omega\operatorname{tr}(\boldsymbol{M}) + \omega^2\det(\boldsymbol{M}),
+= 1 - \omega\mathrm{tr}(\boldsymbol{M}) + \omega^2\det(\boldsymbol{M}),
 $$
 
 where $a_1,a_2$ are the eigenvalues of $\boldsymbol{M}$ — the first form is C's, the middle is B's (as a $2\times2$ determinant), and the trace expansion is A's Newton–Girard form (Eqs. (27)–(28)). Numerically, over 5,000 coefficient matrices drawn uniformly from the admissible region, the maximum absolute discrepancy between the symmetric-polynomial and eigenvalue-wise schemes was $5.7\times10^{-14}$ — the level of double-precision round-off — and on the eigenvalues of the actual $\boldsymbol{W}$ both schemes returned $-8.167312779293$ to all displayed digits. On the common admissible region, the three implementations therefore define the same profile log-likelihood surface.
@@ -158,7 +158,7 @@ $$
 
 Four representative models were re-estimated in the common verification pipeline with A's symmetric-polynomial log-determinant substituted for the eigenvalue-wise routine, holding everything else (data, initial values, optimizer settings) fixed:
 
-| Model | $\max\lvert\Delta(\boldsymbol{\rho},\boldsymbol{\lambda})\rvert$ | $\max\lvert\Delta\boldsymbol{\beta}\rvert$ | $\max\lvert\Delta\boldsymbol{\Sigma}\rvert$ | $\lvert\Delta\log\operatorname{Lik}\rvert$ |
+| Model | $\max\lvert\Delta(\boldsymbol{\rho},\boldsymbol{\lambda})\rvert$ | $\max\lvert\Delta\boldsymbol{\beta}\rvert$ | $\max\lvert\Delta\boldsymbol{\Sigma}\rvert$ | $\lvert\Delta\log\mathrm{Lik}\rvert$ |
 |---|---:|---:|---:|---:|
 | 1111 | $5.8\times10^{-8}$ | $1.1\times10^{-8}$ | $2.4\times10^{-10}$ | 0 (all digits) |
 | 1011 | $9.1\times10^{-9}$ | $5.8\times10^{-9}$ | $1.6\times10^{-10}$ | 0 (all digits) |
@@ -305,12 +305,12 @@ MSTR_CORES=4 Rscript implement-A.r
 **Criteria formulas as computed (for this dataset):**
 
 $$
-\operatorname{pAIC} = -2\ell(\hat{\boldsymbol{\theta}}) + 2\operatorname{deff},
+\mathrm{pAIC} = -2\ell(\hat{\boldsymbol{\theta}}) + 2\mathrm{deff},
 \qquad
-\operatorname{pBIC} = -2\ell(\hat{\boldsymbol{\theta}}) + \log(800)\operatorname{deff},
+\mathrm{pBIC} = -2\ell(\hat{\boldsymbol{\theta}}) + \log(800)\mathrm{deff},
 $$
 
-with $\operatorname{deff}$ as defined in Section 2.4; ordinary AIC/BIC use the nominal parameter counts in the table in Section 5. The averaged pseudo-$\bar{R}^2$ (§4.4 of the paper) is reported descriptively by B.
+with $\mathrm{deff}$ as defined in Section 2.4; ordinary AIC/BIC use the nominal parameter counts in the table in Section 5. The averaged pseudo-$\bar{R}^2$ (§4.4 of the paper) is reported descriptively by B.
 
 ## 7. Limitations and future work
 
@@ -322,6 +322,6 @@ with $\operatorname{deff}$ as defined in Section 2.4; ordinary AIC/BIC use the n
 
 4. The pBIC path of Section 3.4 terminated at the boundary of the examined grid; the grid must be extended (or the $\gamma \to \infty$ limit compared directly) before the pBIC-selected $\gamma$ is interpreted.
 
-5. The Hessian-eigenvalue flooring and fallback rules of Section 2.4 are approximations; the per-fit diagnostics listed there (minimum eigenvalue, negative-eigenvalue count, condition number, $\operatorname{deff}$ before/after flooring, finite-difference step sensitivity) should be added to the standard output.
+5. The Hessian-eigenvalue flooring and fallback rules of Section 2.4 are approximations; the per-fit diagnostics listed there (minimum eigenvalue, negative-eigenvalue count, condition number, $\mathrm{deff}$ before/after flooring, finite-difference step sensitivity) should be added to the standard output.
 
 6. Porting A's symmetric-polynomial log-determinant into B/C to lift the $K = 2$ restriction, and unifying the three programs' admissibility rules (Section 2.3), are natural next steps.
